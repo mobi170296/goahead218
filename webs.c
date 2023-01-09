@@ -73,7 +73,7 @@ static int		websOpenCount = 0;		/* count of apps using this module */
 static int 		websGetInput(webs_t wp, char_t **ptext, int *nbytes);
 static int 		websParseFirst(webs_t wp, char_t *text);
 static void 	websParseRequest(webs_t wp);
-static void		websSocketEvent(int sid, int mask, int data);
+static void		websSocketEvent(int sid, int mask, long data);
 static int		websGetTimeSinceMark(webs_t wp);
 
 #ifdef WEBS_LOG_SUPPORT
@@ -287,7 +287,7 @@ int websAccept(int sid, char *ipaddr, int port, int listenSid)
 /*
  *	Arrange for websSocketEvent to be called when read data is available
  */
-	socketCreateHandler(sid, SOCKET_READABLE, websSocketEvent, (int) wp);
+	socketCreateHandler(sid, SOCKET_READABLE, websSocketEvent, (long) wp);
 
 /*
  *	Arrange for a timeout to kill hung requests
@@ -304,7 +304,7 @@ int websAccept(int sid, char *ipaddr, int port, int listenSid)
  *	is passed as an (int) in iwp.
  */
 
-static void websSocketEvent(int sid, int mask, int iwp)
+static void websSocketEvent(int sid, int mask, long iwp)
 {
 	webs_t	wp;
 
@@ -316,9 +316,11 @@ static void websSocketEvent(int sid, int mask, int iwp)
 	}
 
 	if (mask & SOCKET_READABLE) {
+		printf("READABLE\n");
 		websReadEvent(wp);
 	} 
 	if (mask & SOCKET_WRITABLE) {
+		printf("WRITABLE\n");
 		if (websValid(wp) && wp->writeSocket) {
 			(*wp->writeSocket)(wp);
 		}
@@ -334,6 +336,7 @@ static void websSocketEvent(int sid, int mask, int iwp)
 
 void websReadEvent(webs_t wp)
 {
+	printf("%s...\n", __func__);
 	char_t 	*text;
 	int		rc, nbytes, len, done, fd;
 
@@ -375,6 +378,7 @@ void websReadEvent(webs_t wp)
  */
 		switch(wp->state) {
 		case WEBS_BEGIN:
+			printf("BEGIN\n");
 /*
  *			Parse the first line of the Http header
  */
@@ -382,10 +386,12 @@ void websReadEvent(webs_t wp)
 				done++;
 				break;
 			}
+			printf("BEGIN -> HEADER\n");
 			wp->state = WEBS_HEADER;
 			break;
 		
 		case WEBS_HEADER:
+			printf("HEADER\n");
 /*
  *			Store more of the HTTP header. As we are doing line reads, we
  *			need to separate the lines with '\n'
@@ -397,6 +403,7 @@ void websReadEvent(webs_t wp)
 			break;
 
 		case WEBS_POST_CLEN:
+			printf("POST_CLEN\n");
 /*
  *			POST request with content specified by a content length.
  *			If this is a CGI request, write the data to the cgi stdin.
@@ -482,6 +489,7 @@ void websReadEvent(webs_t wp)
 			break;
 
 		case WEBS_POST:
+			printf("POST\n");
 /*
  *			POST without content-length specification
  *			If this is a CGI request, write the data to the cgi stdin.
@@ -529,6 +537,7 @@ void websReadEvent(webs_t wp)
 	if (text) {
 		bfree(B_L, text);
 	}
+	printf("%s.\n", __func__);
 }
 
 /******************************************************************************/
@@ -1949,7 +1958,7 @@ void websDone(webs_t wp, int code)
 				ringqFlush(&wp->header);
 			}
 			socketCreateHandler(wp->sid, SOCKET_READABLE, websSocketEvent, 
-				(int) wp);
+				(long) wp);
 			websTimeoutCancel(wp);
 			wp->timeout = emfSchedCallback(WEBS_TIMEOUT, websTimeout,
 				(void *) wp);
@@ -2380,7 +2389,7 @@ void websSetRequestSocketHandler(webs_t wp, int mask, void (*fn)(webs_t wp))
 	a_assert(websValid(wp));
 
 	wp->writeSocket = fn;
-	socketCreateHandler(wp->sid, SOCKET_WRITABLE, websSocketEvent, (int) wp);
+	socketCreateHandler(wp->sid, SOCKET_WRITABLE, websSocketEvent, (long) wp);
 }
 
 /******************************************************************************/

@@ -152,7 +152,7 @@ int websSSLAccept(int sid, char *ipaddr, int port, int listenSid)
 /*
  *    Arrange for websSocketEvent to be called when read data is available
  */
-    socketCreateHandler(sid, SOCKET_READABLE, websSSLSocketEvent, (int) wp);
+    socketCreateHandler(sid, SOCKET_READABLE, websSSLSocketEvent, (long) wp);
 
 /*
  *    Arrange for a timeout to kill hung requests

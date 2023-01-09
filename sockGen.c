@@ -353,7 +353,7 @@ static void socketAccept(socket_t *sp)
 {
 	struct sockaddr_in	addr;
 	socket_t 			*nsp;
-	size_t				len;
+	socklen_t			len;
 	char				*pString;
 	int 				newSock, nid;
 
@@ -368,7 +368,7 @@ static void socketAccept(socket_t *sp)
  *	Accept the connection and prevent inheriting by children (F_SETFD)
  */
 	len = sizeof(struct sockaddr_in);
-	if ((newSock = accept(sp->sock, (struct sockaddr *) &addr, (int *) &len)) < 0) {
+	if ((newSock = accept(sp->sock, (struct sockaddr *) &addr, &len)) < 0) {
 		return;
 	}
 #ifndef __NO_FCNTL
@@ -418,7 +418,8 @@ int socketGetInput(int sid, char *buf, int toRead, int *errCode)
 {
 	struct sockaddr_in 	server;
 	socket_t			*sp;
-	int 				len, bytesRead;
+	socklen_t			len;
+	int 				bytesRead;
 
 	a_assert(buf);
 	a_assert(errCode);
@@ -731,13 +732,14 @@ int socketSelect(int sid, int timeout)
 	socket_t		*sp;
 	struct timeval	tv;
 	fd_mask 		*readFds, *writeFds, *exceptFds;
-	int 			all, len, nwords, index, bit, nEvents;
+	int 			all, len, nwords, index, nEvents;
+	long int 		bit;
 
 /*
  *	Allocate and zero the select masks
  */
 	nwords = (socketHighestFd + NFDBITS) / NFDBITS;
-	len = nwords * sizeof(int);
+	len = nwords;
 
 	readFds = balloc(B_L, len);
 	memset(readFds, 0, len);
@@ -773,7 +775,7 @@ int socketSelect(int sid, int timeout)
  * 		Initialize the ready masks and compute the mask offsets.
  */
 		index = sp->sock / (NBBY * sizeof(fd_mask));
-		bit = 1 << (sp->sock % (NBBY * sizeof(fd_mask)));
+		bit = 1L << (sp->sock % (NBBY * sizeof(fd_mask)));
 		
 /*
  * 		Set the appropriate bit in the ready masks for the sp->sock.
@@ -820,7 +822,7 @@ int socketSelect(int sid, int timeout)
 			}
 
 			index = sp->sock / (NBBY * sizeof(fd_mask));
-			bit = 1 << (sp->sock % (NBBY * sizeof(fd_mask)));
+			bit = 1L << (sp->sock % (NBBY * sizeof(fd_mask)));
 
 			if (readFds[index] & bit || socketInputBuffered(sid) > 0) {
 				sp->currentEvents |= SOCKET_READABLE;
@@ -950,7 +952,7 @@ static int socketDoEvent(socket_t *sp)
 int socketSetBlock(int sid, int on)
 {
 	socket_t		*sp;
-	unsigned long	flag;
+	unsigned long	flag __attribute__((unused));
 	int				iflag;
 	int				oldBlock;
 

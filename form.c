@@ -102,7 +102,7 @@ int websFormDefine(char_t *name, void (*fn)(webs_t wp, char_t *path,
 		return -1;
 	}
 
-	symEnter(formSymtab, name, valueInteger((int) fn), (int) NULL);
+	symEnter(formSymtab, name, valueInteger((long)fn), (int) NULL);
 	return 0;
 }
 
