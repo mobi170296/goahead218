@@ -111,11 +111,11 @@ int hAlloc(void ***map)
 
 int hFree(void ***map, int handle)
 {
-	int		*mp;
-	int		len;
+	long	*mp;
+	long	len;
 
 	a_assert(map);
-	mp = &((*(int**)map)[-H_OFFSET]);
+	mp = &((*(long**)map)[-H_OFFSET]);
 	a_assert(mp[H_LEN] >= H_INCR);
 
 	a_assert(mp[handle + H_OFFSET]);
