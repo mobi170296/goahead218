@@ -99,7 +99,7 @@ int websAspRequest(webs_t wp, char_t *lpath)
 		websError(wp, 200, T("Can't create Ejscript engine"));
 		goto done;
 	}
-	ejSetUserHandle(ejid, (int) wp);
+	ejSetUserHandle(ejid, (long) wp);
 
 	if (websPageStat(wp, lpath, path, &sbuf) < 0) {
 		websError(wp, 200, T("Can't stat %s"), lpath);
@@ -184,7 +184,7 @@ int websAspRequest(webs_t wp, char_t *lpath)
 				if (engine == EMF_SCRIPT_EJSCRIPT) {
 					rc = scriptEval(engine, nextp, &result, ejid);
 				} else {
-					rc = scriptEval(engine, nextp, &result, (int) wp);
+					rc = scriptEval(engine, nextp, &result, (long) wp);
 				}
 				if (rc < 0) {
 /*

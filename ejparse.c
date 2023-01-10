@@ -1545,7 +1545,7 @@ int ejArgs(int argc, char_t **argv, char_t *fmt, ...)
  *	Define the user handle
  */
 
-void ejSetUserHandle(int eid, int handle)
+void ejSetUserHandle(int eid, long handle)
 {
 	ej_t	*ep;
 
