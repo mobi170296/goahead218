@@ -316,11 +316,9 @@ static void websSocketEvent(int sid, int mask, long iwp)
 	}
 
 	if (mask & SOCKET_READABLE) {
-		printf("READABLE\n");
 		websReadEvent(wp);
 	} 
 	if (mask & SOCKET_WRITABLE) {
-		printf("WRITABLE\n");
 		if (websValid(wp) && wp->writeSocket) {
 			(*wp->writeSocket)(wp);
 		}
@@ -336,7 +334,6 @@ static void websSocketEvent(int sid, int mask, long iwp)
 
 void websReadEvent(webs_t wp)
 {
-	printf("%s...\n", __func__);
 	char_t 	*text;
 	int		rc, nbytes, len, done, fd;
 
@@ -378,7 +375,6 @@ void websReadEvent(webs_t wp)
  */
 		switch(wp->state) {
 		case WEBS_BEGIN:
-			printf("BEGIN\n");
 /*
  *			Parse the first line of the Http header
  */
@@ -386,12 +382,10 @@ void websReadEvent(webs_t wp)
 				done++;
 				break;
 			}
-			printf("BEGIN -> HEADER\n");
 			wp->state = WEBS_HEADER;
 			break;
 		
 		case WEBS_HEADER:
-			printf("HEADER\n");
 /*
  *			Store more of the HTTP header. As we are doing line reads, we
  *			need to separate the lines with '\n'
@@ -403,7 +397,6 @@ void websReadEvent(webs_t wp)
 			break;
 
 		case WEBS_POST_CLEN:
-			printf("POST_CLEN\n");
 /*
  *			POST request with content specified by a content length.
  *			If this is a CGI request, write the data to the cgi stdin.
@@ -489,7 +482,6 @@ void websReadEvent(webs_t wp)
 			break;
 
 		case WEBS_POST:
-			printf("POST\n");
 /*
  *			POST without content-length specification
  *			If this is a CGI request, write the data to the cgi stdin.
@@ -537,7 +529,6 @@ void websReadEvent(webs_t wp)
 	if (text) {
 		bfree(B_L, text);
 	}
-	printf("%s.\n", __func__);
 }
 
 /******************************************************************************/
